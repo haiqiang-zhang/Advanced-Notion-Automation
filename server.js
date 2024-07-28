@@ -93,6 +93,7 @@ function convertMultiSelectToNameObjArray(multi_select) {
 }
 
 async function syncDB() {
+  try {
     console.log('Starting interval');
 
     const tasks = await getTasks();
@@ -210,6 +211,9 @@ async function syncDB() {
       
     }
     console.log(`[${new Date().toLocaleString()}] Sync Interval Task Finished`);
+  } catch (error) {
+    console.error(`[${new Date().toLocaleString()}] Error: ${error}`);
+  }
 }
 
 
