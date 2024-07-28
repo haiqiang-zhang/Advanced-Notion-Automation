@@ -129,7 +129,7 @@ async function syncDB() {
         let db2_last_edited_time = db2_row ? new Date(db2_row.last_edited_time) : null;
         if (db2_row) {
           //update db2_row
-          if (db1_last_edited_time > db2_last_edited_time && (db1_row.properties["Due"].date != db2_row.properties["Date"].date || db1_row.properties["Status"].status != db2_row.properties["Status"].status)) {
+          if (db1_last_edited_time > db2_last_edited_time && (db1_row.properties["Due"].date != db2_row.properties["Date"].date || db1_row.properties["Status"].status.name != db2_row.properties["Status"].status.name)) {
             console.log('update'+ db2_row.properties["Event"].title[0].text.content + ' ' + db1_row.properties.Course.multi_select[0].name);
             await notion.pages.update({
               page_id: db2_row.id,
@@ -140,7 +140,7 @@ async function syncDB() {
             });
           }
           
-        } else {
+        } else if (db1_row.properties.Course.multi_select.length > 0 && db1_row.properties["Semester"].multi_select.length > 0) {
           //create db2_row
           console.log('create'+ db1_row.properties["Task name"].title[0].text.content);
           await notion.pages.create({
@@ -175,7 +175,7 @@ async function syncDB() {
         let db2_last_edited_time = new Date(db2_row.last_edited_time);
         if (db1_row) {
           //update db1_row
-          if (db2_last_edited_time > db1_last_edited_time && (db2_row.properties["Date"].date !== db1_row.properties["Due"].date || db2_row.properties["Status"].status !== db1_row.properties["Status"].status)) {
+          if (db2_last_edited_time > db1_last_edited_time && (db2_row.properties["Date"].date != db1_row.properties["Due"].date || db2_row.properties["Status"].status.name != db1_row.properties["Status"].status.name)) {
             console.log('update'+ db1_row.properties["Task name"].title[0].text.content);
             await notion.pages.update({
               page_id: db1_row.id,
@@ -186,7 +186,7 @@ async function syncDB() {
             });
           }
           
-        } else {
+        } else if (db2_row.properties.Course.multi_select.length > 0 && db2_row.properties["Semester"].multi_select.length > 0) {
           //create db1_row
           console.log('create'+ db2_row.properties["Event"].title[0].text.content);
           await notion.pages.create({
@@ -223,18 +223,8 @@ function startInterval(timeInterval) {
 
 app.listen(process.env.PORT || 3000, async () => {
     await initDB();
-    startInterval(60000);
-    
+    startInterval(process.env.TASKS_INTERVAL);
+
 
     console.log(`Server is running on port ${process.env.PORT || 3000}`)
 })
-
-
-
-
-
-    // function startInterval(timeInterval) {
-    //     intervalId = setInterval(() => {
-            
-    //     }, timeInterval);
-    // }
