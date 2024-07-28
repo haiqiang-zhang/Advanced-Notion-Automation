@@ -126,6 +126,7 @@ async function syncDB() {
           continue;
         }
         let db2_row = db2_rows.find((r) => nameCleaner(r.properties["Event"].title[0].text.content) === nameCleaner(db1_row.properties["Task name"].title[0].text.content)
+                                  && r.properties.Course.multi_select.length > 0 && r.properties["Semester"].multi_select.length > 0
                                   && r.properties.Course.multi_select[0].name === db1_row.properties.Course.multi_select[0].name
                                   && r.properties["Semester"].multi_select[0].name === db1_row.properties["Semester"].multi_select[0].name);
 
@@ -176,6 +177,7 @@ async function syncDB() {
           continue;
         }
         let db1_row = db1_rows.find((r) => nameCleaner(r.properties["Task name"].title[0].text.content) === nameCleaner(db2_row.properties["Event"].title[0].text.content)
+                                  && r.properties.Course.multi_select.length > 0 && r.properties["Semester"].multi_select.length > 0
                                   && r.properties.Course.multi_select[0].name === db2_row.properties.Course.multi_select[0].name
                                   && r.properties["Semester"].multi_select[0].name === db2_row.properties["Semester"].multi_select[0].name);
         let db1_last_edited_time = db1_row ? new Date(db1_row.last_edited_time) : null;
