@@ -122,6 +122,9 @@ async function syncDB() {
       //if it exists, update it in db2
       //and vice versa
       for (const db1_row of db1_rows) {
+        if (db1_row.properties.Course.multi_select.length === 0 || db1_row.properties["Semester"].multi_select.length === 0) {
+          continue;
+        }
         let db2_row = db2_rows.find((r) => nameCleaner(r.properties["Event"].title[0].text.content) === nameCleaner(db1_row.properties["Task name"].title[0].text.content)
                                   && r.properties.Course.multi_select[0].name === db1_row.properties.Course.multi_select[0].name
                                   && r.properties["Semester"].multi_select[0].name === db1_row.properties["Semester"].multi_select[0].name);
@@ -169,6 +172,9 @@ async function syncDB() {
 
       //sync db2 to db1
       for (const db2_row of db2_rows) {
+        if (db2_row.properties.Course.multi_select.length === 0 || db2_row.properties["Semester"].multi_select.length === 0) {
+          continue;
+        }
         let db1_row = db1_rows.find((r) => nameCleaner(r.properties["Task name"].title[0].text.content) === nameCleaner(db2_row.properties["Event"].title[0].text.content)
                                   && r.properties.Course.multi_select[0].name === db2_row.properties.Course.multi_select[0].name
                                   && r.properties["Semester"].multi_select[0].name === db2_row.properties["Semester"].multi_select[0].name);
