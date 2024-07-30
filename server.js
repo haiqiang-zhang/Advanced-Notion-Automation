@@ -92,9 +92,19 @@ function convertMultiSelectToNameObjArray(multi_select) {
   return multi_select.map((x) => {return {name: x.name}});
 }
 
+
+function convertTitleObjToPlainText(title_obj) {
+  let plain_text = '';
+  title_obj.title.forEach((x) => {
+    plain_text += x.text.content;
+  })
+  return plain_text;
+
+}
+
 async function syncDB() {
   try {
-    console.log('Starting interval');
+    console.log(`[${new Date().toLocaleString()}] Starting interval`);
 
     const tasks = await getTasks();
 
@@ -125,7 +135,8 @@ async function syncDB() {
         if (db1_row.properties.Course.multi_select.length === 0 || db1_row.properties["Semester"].multi_select.length === 0) {
           continue;
         }
-        let db2_row = db2_rows.find((r) => nameCleaner(r.properties["Event"].title[0].text.content) === nameCleaner(db1_row.properties["Task name"].title[0].text.content)
+        const db1_row_name = nameCleaner(convertTitleObjToPlainText(db1_row.properties["Task name"]));
+        let db2_row = db2_rows.find((r) => nameCleaner(convertTitleObjToPlainText(r.properties["Event"])) === db1_row_name
                                   && r.properties.Course.multi_select.length > 0 && r.properties["Semester"].multi_select.length > 0
                                   && r.properties.Course.multi_select[0].name === db1_row.properties.Course.multi_select[0].name
                                   && r.properties["Semester"].multi_select[0].name === db1_row.properties["Semester"].multi_select[0].name);
@@ -135,7 +146,7 @@ async function syncDB() {
         if (db2_row) {
           //update db2_row
           if (db1_last_edited_time > db2_last_edited_time && (db1_row.properties["Due"].date != db2_row.properties["Date"].date || db1_row.properties["Status"].status.name != db2_row.properties["Status"].status.name)) {
-            console.log('update'+ db2_row.properties["Event"].title[0].text.content + ' ' + db1_row.properties.Course.multi_select[0].name);
+            console.log('update '+ db1_row_name + '-' + db1_row.properties.Course.multi_select[0].name + '-' + db1_row.properties["Semester"].multi_select[0].name);
             await notion.pages.update({
               page_id: db2_row.id,
               properties: {
@@ -147,7 +158,7 @@ async function syncDB() {
           
         } else if (db1_row.properties.Course.multi_select.length > 0 && db1_row.properties["Semester"].multi_select.length > 0) {
           //create db2_row
-          console.log('create'+ db1_row.properties["Task name"].title[0].text.content);
+          console.log('create '+ db1_row_name + '-' + db1_row.properties.Course.multi_select[0].name + '-' + db1_row.properties["Semester"].multi_select[0].name);
           await notion.pages.create({
             parent: { 
               "type": "database_id",
@@ -176,7 +187,8 @@ async function syncDB() {
         if (db2_row.properties.Course.multi_select.length === 0 || db2_row.properties["Semester"].multi_select.length === 0) {
           continue;
         }
-        let db1_row = db1_rows.find((r) => nameCleaner(r.properties["Task name"].title[0].text.content) === nameCleaner(db2_row.properties["Event"].title[0].text.content)
+        let db2_row_name = nameCleaner(convertTitleObjToPlainText(db2_row.properties["Event"]));
+        let db1_row = db1_rows.find((r) => nameCleaner(convertTitleObjToPlainText(r.properties["Task name"])) === db2_row_name
                                   && r.properties.Course.multi_select.length > 0 && r.properties["Semester"].multi_select.length > 0
                                   && r.properties.Course.multi_select[0].name === db2_row.properties.Course.multi_select[0].name
                                   && r.properties["Semester"].multi_select[0].name === db2_row.properties["Semester"].multi_select[0].name);
@@ -185,7 +197,7 @@ async function syncDB() {
         if (db1_row) {
           //update db1_row
           if (db2_last_edited_time > db1_last_edited_time && (db2_row.properties["Date"].date != db1_row.properties["Due"].date || db2_row.properties["Status"].status.name != db1_row.properties["Status"].status.name)) {
-            console.log('update'+ db1_row.properties["Task name"].title[0].text.content);
+            console.log('update '+ db1_row_name + '-' + db1_row.properties.Course.multi_select[0].name + '-' + db1_row.properties["Semester"].multi_select[0].name);
             await notion.pages.update({
               page_id: db1_row.id,
               properties: {
@@ -197,7 +209,7 @@ async function syncDB() {
           
         } else if (db2_row.properties.Course.multi_select.length > 0 && db2_row.properties["Semester"].multi_select.length > 0) {
           //create db1_row
-          console.log('create'+ db2_row.properties["Event"].title[0].text.content);
+          console.log('create '+ db1_row_name + '-' + db1_row.properties.Course.multi_select[0].name + '-' + db1_row.properties["Semester"].multi_select[0].name);
           await notion.pages.create({
             parent: { 
               "type": "database_id",
@@ -236,6 +248,7 @@ function startInterval(timeInterval) {
 app.listen(process.env.PORT || 3000, async () => {
     await initDB();
     startInterval(process.env.TASKS_INTERVAL);
+    // syncDB();
 
 
     console.log(`Server is running on port ${process.env.PORT || 3000}`)
