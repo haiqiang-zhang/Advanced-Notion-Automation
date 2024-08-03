@@ -197,7 +197,7 @@ async function syncDB() {
         if (db1_row) {
           //update db1_row
           if (db2_last_edited_time > db1_last_edited_time && (db2_row.properties["Date"].date != db1_row.properties["Due"].date || db2_row.properties["Status"].status.name != db1_row.properties["Status"].status.name)) {
-            console.log('update '+ db1_row_name + '-' + db1_row.properties.Course.multi_select[0].name + '-' + db1_row.properties["Semester"].multi_select[0].name);
+            console.log('update '+ db2_row_name + '-' + db2_row.properties.Course.multi_select[0].name + '-' + db2_row.properties["Semester"].multi_select[0].name);
             await notion.pages.update({
               page_id: db1_row.id,
               properties: {
@@ -209,7 +209,7 @@ async function syncDB() {
           
         } else if (db2_row.properties.Course.multi_select.length > 0 && db2_row.properties["Semester"].multi_select.length > 0) {
           //create db1_row
-          console.log('create '+ db1_row_name + '-' + db1_row.properties.Course.multi_select[0].name + '-' + db1_row.properties["Semester"].multi_select[0].name);
+          console.log('create '+ db2_row_name + '-' + db2_row.properties.Course.multi_select[0].name + '-' + db2_row.properties["Semester"].multi_select[0].name);
           await notion.pages.create({
             parent: { 
               "type": "database_id",
